@@ -1,0 +1,12 @@
+INPUT(
+./release\main.o
+./release\widget.o
+./release\log.o
+./release\database.o
+./release\adoconnection.o
+./release\adorecordset.o
+./release\redis.o
+./release\moc_widget.o
+./release\moc_adoconnection.o
+./release\moc_adorecordset.o
+);

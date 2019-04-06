@@ -1,0 +1,12 @@
+INPUT(
+./debug\main.o
+./debug\widget.o
+./debug\log.o
+./debug\database.o
+./debug\adoconnection.o
+./debug\adorecordset.o
+./debug\redis.o
+./debug\moc_widget.o
+./debug\moc_adoconnection.o
+./debug\moc_adorecordset.o
+);
