@@ -1,4 +1,6 @@
 #include "database.h"
+#include "define.h"
+#include "log.h"
 
 #include <QDebug>
 
@@ -50,4 +52,60 @@ QSet<QString> Database::GetWaitCheckDomains()
     }
 
     return domains;
+}
+
+bool Database::ModifyDomain(QString domain)
+{
+    AdoRecordset recordset(m_pAdoConnection);
+
+    QString sql = "SELECT Domain FROM GameHallDomainPool WHERE State = 0 ORDER BY UpdateTime ASC";
+
+    recordset.open(sql);
+
+    if (!recordset.next())
+    {
+        LogNotice("域名池为空,没有闲置的域名了");
+
+        return false;
+    }
+
+    QString newDomain = recordset.fieldValue(0).toString();
+
+    recordset.close();
+
+    sql = QString("SELECT a.GameHallId, a.AppBindDomain, b.Code FROM GameHallConfig a, GameHallInfo b WHERE a.GameHallId = b.GameHallId AND a.AppBindDomain = '%1'")
+            .arg(domain);
+
+   recordset.open(sql);
+   QStringList sqlList;
+
+   while (recordset.next())
+   {
+        sqlList.append(QString("INSERT INTO GameHallReuseDomain(Domain, GameHallId, Code) VALUES ('%1', %2, '%3')")
+                       .arg(recordset.fieldValue(1).toString())
+                       .arg(recordset.fieldValue(0).toString())
+                       .arg(recordset.fieldValue(2).toString()));
+   }
+
+   recordset.close();
+
+   foreach(const QString& sql2, sqlList)
+   {
+       recordset.open(sql2);
+   }
+
+    sql = QString("UPDATE GameHallConfig SET AppRootDomain='%1', AppBindDomain='%2', AppCookieDomain='%3' WHERE AppBindDomain='%4'")
+            .arg(newDomain)
+            .arg("wx." + newDomain)
+            .arg("." + newDomain)
+            .arg(domain);
+
+    recordset.open(sql);
+
+    sql = QString("UPDATE GameHallDomainPool SET State=1, UpdateTime=GETDATE() WHERE Domain='%1'")
+            .arg(newDomain);
+
+    recordset.open(sql);
+
+    return true;
 }

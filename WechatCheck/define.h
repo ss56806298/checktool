@@ -8,6 +8,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QEventLoop>
+#include <QJsonParseError>
+#include <QTimer>
 
 #include "windows.h"
 
@@ -20,8 +22,12 @@ enum LOG_LEVEL
     ERROR_LEVEL
 };
 
-#define LogInfo(Data) Log::Write(Data, INFO_LEVEL)
-#define LogNotice(Data) Log::Write(Data, NOTICE_LEVEL)
-#define LogError(Data) Log::Write(Data, ERROR_LEVEL)
+#define LogInfo(Data) Log::Write(Data, INFO_LEVEL, false)
+#define LogNotice(Data) Log::Write(Data, NOTICE_LEVEL, false)
+#define LogError(Data) Log::Write(Data, ERROR_LEVEL, false)
+
+#define LogInfoF(Data) Log::Write(Data, INFO_LEVEL, true)
+#define LogNoticeF(Data) Log::Write(Data, NOTICE_LEVEL, true)
+#define LogErrorF(Data) Log::Write(Data, ERROR_LEVEL, true)
 
 #endif // DEFINE_H

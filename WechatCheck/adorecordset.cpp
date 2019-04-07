@@ -38,6 +38,7 @@ void AdoRecordset::exception(int code, const QString& source, const QString& des
 
 bool AdoRecordset::open(const QString & sql)
 {
+    LogInfoF("执行脚本:" + sql);
     HRESULT hr = object->dynamicCall("Open(QString, QVariant, int, int, int)", sql, dbConnection, adOpenStatic, adLockOptimistic, adCmdText).toInt();
     initial = true;
     return SUCCEEDED(hr);

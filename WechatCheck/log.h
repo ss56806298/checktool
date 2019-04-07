@@ -12,7 +12,7 @@ public:
 
     static bool SetLogBrowser(QTextBrowser * pTextBrowser);
 
-    static bool Write(QString logData, LOG_LEVEL level);
+    static bool Write(QString logData, LOG_LEVEL level, bool onlyFile);
 
 //    QTextBrowser * m_pLogBrowser;
 };

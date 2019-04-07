@@ -16,6 +16,8 @@ public:
     bool Init(QString& DBName, QString& DBAddr, QString& UserName, QString& DBPass, QString& DBPort);
 
     QSet<QString> GetWaitCheckDomains();
+
+    bool ModifyDomain(QString domain);
 };
 
 #endif // DATABASE_H

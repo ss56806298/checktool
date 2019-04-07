@@ -28,9 +28,9 @@ bool Log::SetLogBrowser(QTextBrowser * logBrowser)
     return true;
 }
 
-bool Log::Write(QString logData, LOG_LEVEL level)
+bool Log::Write(QString logData, LOG_LEVEL level, bool onlyFile)
 {
-    if (m_pLogBrowser != NULL) m_pLogBrowser->append(logData);
+    if (m_pLogBrowser != NULL && !onlyFile) m_pLogBrowser->append(logData);
 
     if (m_pLogFile != NULL)
     {

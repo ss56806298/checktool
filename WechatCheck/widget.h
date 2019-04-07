@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QTextBrowser>
 #include <QSettings>
+#include <QValidator>
 
 namespace Ui {
 class Widget;
@@ -25,6 +26,10 @@ protected:
     QTextBrowser * m_pLogBrowser;
     //配置文件
     QSettings * m_pSettings;
+    //数字过滤器
+    QValidator *m_pNumValidator;
+    //倒计时
+    QTimer *m_pTimer;
 
 //系统服务对象
 protected:
@@ -49,7 +54,19 @@ private:
     //检测
     bool check();
     //检测域名
-    bool checkDomain(QString domain, QNetworkAccessManager * pNetManager);
+    bool checkDomain(QString domain);
+    //获取wechat的accesstoken
+    bool getWechatAccessToken(QString& token);
+    //更换域名
+    bool modifyDomain(QString domain);
+    //获取http返回
+    bool getHttpResponse(QString url, QByteArray& response);
+    //获取http返回
+    bool postHttpResponse(QString url, QByteArray postData, QByteArray& response);
+    //获取json某个字段
+    bool getJsonContent(QByteArray jsonString, QString key, QString& value);
+    //获取短域名
+    bool getShortUrl(QString token, QString domain, QString& shortUrl);
 
 private:
     Ui::Widget *ui;
