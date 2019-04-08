@@ -30,7 +30,8 @@ SOURCES += \
     database.cpp \
     adoconnection.cpp \
     adorecordset.cpp \
-    redis.cpp
+    qtredis.cpp \
+    reader.cpp
 
 HEADERS += \
         widget.h \
@@ -41,7 +42,8 @@ HEADERS += \
     ado.h \
     adoconnection.h \
     adorecordset.h \
-    redis.h
+    qtredis.h \
+    reader.h
 
 FORMS += \
         widget.ui

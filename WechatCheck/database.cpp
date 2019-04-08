@@ -1,6 +1,7 @@
 #include "database.h"
 #include "define.h"
 #include "log.h"
+#include "qtredis.h"
 
 #include <QDebug>
 
@@ -9,9 +10,16 @@ Database::Database()
     m_pAdoConnection = new AdoConnection;
 }
 
+Database::Database(QtRedis* pRedis)
+{
+    m_pAdoConnection = new AdoConnection;
+
+    m_pRedis = pRedis;
+}
+
 Database::~Database()
 {
-    delete m_pAdoConnection;
+    //delete m_pAdoConnection;
 }
 
 bool Database::Init(QString& DBName, QString& DBAddr, QString& UserName, QString& DBPass, QString& DBPort)
@@ -29,12 +37,30 @@ bool Database::Init(QString& DBName, QString& DBAddr, QString& UserName, QString
 
     return true;
 }
+bool Database::GetDomainByGameHallId(QString GameHallId, QString &domain)
+{
+    QString sql = "SELECT AppBindDomain FROM GameHallConfig WHERE GameHallId = " + GameHallId;
+
+    AdoRecordset recordset(m_pAdoConnection);
+
+    recordset.open(sql);
+
+    if (!recordset.next())
+    {
+        LogNotice("指定大厅id不存在");
+        return false;
+    }
+
+    domain = recordset.fieldValue(0).toString();
+
+    return true;
+}
 
 QSet<QString> Database::GetWaitCheckDomains()
 {
     QSet<QString> domains;
 
-    QString sql = "SELECT AppBindDomain FROM GameHallConfig WHERE GameHallId > 3";
+    QString sql = "SELECT AppBindDomain FROM GameHallConfig WHERE GameHallId > 3 ORDER BY GameHallId ASC";
     AdoRecordset recordset(m_pAdoConnection);
 
     recordset.open(sql);
@@ -81,6 +107,10 @@ bool Database::ModifyDomain(QString domain)
 
    while (recordset.next())
    {
+        if (m_pRedis != NULL)
+        {
+            m_pRedis->del(REDIS_GAMEHALL + recordset.fieldValue(0).toString());
+        }
         sqlList.append(QString("INSERT INTO GameHallReuseDomain(Domain, GameHallId, Code) VALUES ('%1', %2, '%3')")
                        .arg(recordset.fieldValue(1).toString())
                        .arg(recordset.fieldValue(0).toString())

@@ -2,6 +2,7 @@
 #define WIDGET_H
 #include "database.h"
 #include "log.h"
+#include "qtredis.h"
 
 #include <QWidget>
 #include <QTextBrowser>
@@ -30,15 +31,25 @@ protected:
     QValidator *m_pNumValidator;
     //倒计时
     QTimer *m_pTimer;
+    //指定检测倒计时
+    QTimer *m_pTargetTimer;
+    //指定更换倒计时
+    QTimer *m_pModifyTimer;
 
 //系统服务对象
 protected:
     //DB
-    Database * m_pDatabase;
+    Database * m_pDatabase = NULL;
+    //redis
+    QtRedis * m_pRedis = NULL;
 
 //界面调用
     //开始运行
     bool Start();
+    //指定大厅的开始运行
+    bool TargetStart();
+    //指定大厅更换
+    bool TargetModify();
 
 //系统函数
 public:
@@ -49,10 +60,17 @@ private:
     bool InitLog();
     //初始化DB
     bool InitDatabase();
+    //初始化redis
+    bool InitRedis();
 
 private:
     //检测
     bool check();
+    //指定域名检测
+    bool targetCheck();
+    //指定大厅更换
+    bool targetModify();
+
     //检测域名
     bool checkDomain(QString domain);
     //获取wechat的accesstoken

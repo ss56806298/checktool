@@ -30,4 +30,8 @@ enum LOG_LEVEL
 #define LogNoticeF(Data) Log::Write(Data, NOTICE_LEVEL, true)
 #define LogErrorF(Data) Log::Write(Data, ERROR_LEVEL, true)
 
+#define WECHAT_TOKEN "wechat_token"
+
+#define REDIS_GAMEHALL "__GLOBAL_HALLCONFIG_"
+
 #endif // DEFINE_H
