@@ -39,6 +39,7 @@ public:
     QLineEdit *modifyHallEdit;
     QLabel *label_4;
     QLineEdit *secondEdit2;
+    QLabel *modifyDelayLabel;
 
     void setupUi(QWidget *Widget)
     {
@@ -87,6 +88,9 @@ public:
         secondEdit2 = new QLineEdit(Widget);
         secondEdit2->setObjectName(QStringLiteral("secondEdit2"));
         secondEdit2->setGeometry(QRect(290, 80, 51, 20));
+        modifyDelayLabel = new QLabel(Widget);
+        modifyDelayLabel->setObjectName(QStringLiteral("modifyDelayLabel"));
+        modifyDelayLabel->setGeometry(QRect(350, 80, 41, 20));
 
         retranslateUi(Widget);
 
@@ -109,6 +113,7 @@ public:
         modifyHallEdit->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
         label_4->setText(QApplication::translate("Widget", "\345\256\232\346\227\266\346\227\266\351\227\264(\347\247\222)", Q_NULLPTR));
         secondEdit2->setText(QApplication::translate("Widget", "120", Q_NULLPTR));
+        modifyDelayLabel->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
     } // retranslateUi
 
 };

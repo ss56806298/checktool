@@ -25,6 +25,8 @@ public:
     bool GetDomainByGameHallId(QString GameHallId, QString& domain);
 
     bool ModifyDomain(QString domain);
+
+    bool ModifyHallId(QString HallId);
 };
 
 #endif // DATABASE_H

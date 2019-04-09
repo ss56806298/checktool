@@ -192,6 +192,19 @@
     <string>120</string>
    </property>
   </widget>
+  <widget class="QLabel" name="modifyDelayLabel">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>80</y>
+     <width>41</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+  </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>

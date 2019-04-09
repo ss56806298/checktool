@@ -26,6 +26,7 @@ Widget::Widget(QWidget *parent) :
     connect(ui->startButton, &QPushButton::clicked, this, &Widget::Start);
     connect(ui->targetStartButton, &QPushButton::clicked, this, &Widget::TargetStart);
     connect(ui->modifyStartButton, &QPushButton::clicked, this, &Widget::TargetModify);
+    connect(m_pModifyTimer, &QTimer::timeout , this, &Widget::DelayTargetModify);
 }
 
 Widget::~Widget()
@@ -155,25 +156,41 @@ bool Widget::TargetModify()
     return true;
 }
 
+bool Widget::DelayTargetModify()
+{
+    m_iModifyDelaySec -= 1;
+
+    ui->modifyDelayLabel->setText(QString::number(m_iModifyDelaySec));
+
+    if (m_iModifyDelaySec == 0)
+    {
+        targetModify();
+
+        return true;
+    }
+
+    m_pModifyTimer->start(1000);
+
+    return true;
+}
+
 //指定大厅id更换
 bool Widget::targetModify()
 {
     QString domain;
 
-    if (!m_pDatabase->GetDomainByGameHallId(ui->modifyHallEdit->text(), domain))
+    if (!m_pDatabase->ModifyHallId(ui->modifyHallEdit->text()))
     {
         return false;
     }
 
-    LogInfo("更换域名" + domain);
-    modifyDomain(domain);
-
-    connect(m_pModifyTimer, &QTimer::timeout , this, &Widget::targetModify);
-
+    LogInfo("更换大厅ID" + ui->modifyHallEdit->text());
     QString sec = ui->secondEdit2->text();
 
+    m_iModifyDelaySec = sec.toInt() + 1;
+
     LogInfo("更换完毕,距离下次更换还有" + sec + "秒");
-    m_pModifyTimer->start(sec.toInt() * 1000);
+    m_pModifyTimer->start(1000);
 
     return true;
 }

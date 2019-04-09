@@ -35,6 +35,8 @@ protected:
     QTimer *m_pTargetTimer;
     //指定更换倒计时
     QTimer *m_pModifyTimer;
+    //指定更换倒计时秒数
+    int m_iModifyDelaySec;
 
 //系统服务对象
 protected:
@@ -50,6 +52,8 @@ protected:
     bool TargetStart();
     //指定大厅更换
     bool TargetModify();
+    //指定大厅更换倒计时
+    bool DelayTargetModify();
 
 //系统函数
 public:
