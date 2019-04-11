@@ -35,6 +35,10 @@ protected:
     QTimer *m_pTargetTimer;
     //指定更换倒计时
     QTimer *m_pModifyTimer;
+    //全局检测倒计时
+    int m_iAllCheckDelaySec;
+    //指定检测倒计时
+    int m_iTargetCheckDelaySec;
     //指定更换倒计时秒数
     int m_iModifyDelaySec;
 
@@ -52,6 +56,10 @@ protected:
     bool TargetStart();
     //指定大厅更换
     bool TargetModify();
+    //全局检测倒计时
+    bool DelayAllCheck();
+    //指定检测倒计时
+    bool DelayTargetCheck();
     //指定大厅更换倒计时
     bool DelayTargetModify();
 

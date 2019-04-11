@@ -9,7 +9,7 @@ bool Log::SetLogPath()
 {
     QString fileName = QDateTime::currentDateTime().toString("yyyyMMddhhmm") + ".log";
 
-    m_pLogFile = new QFile(fileName);
+    m_pLogFile = new QFile(LOG_PATH + fileName);
 
     if(!m_pLogFile->open(QIODevice::ReadWrite|QIODevice::Text))
     {

@@ -34,4 +34,6 @@ enum LOG_LEVEL
 
 #define REDIS_GAMEHALL "__GLOBAL_HALLCONFIG_"
 
+#define LOG_PATH "log/"
+
 #endif // DEFINE_H

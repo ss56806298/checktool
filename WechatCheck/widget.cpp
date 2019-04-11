@@ -27,6 +27,8 @@ Widget::Widget(QWidget *parent) :
     connect(ui->targetStartButton, &QPushButton::clicked, this, &Widget::TargetStart);
     connect(ui->modifyStartButton, &QPushButton::clicked, this, &Widget::TargetModify);
     connect(m_pModifyTimer, &QTimer::timeout , this, &Widget::DelayTargetModify);
+    connect(m_pTimer, &QTimer::timeout, this, &Widget::DelayAllCheck);
+    connect(m_pTargetTimer, &QTimer::timeout, this, &Widget::DelayTargetCheck);
 }
 
 Widget::~Widget()
@@ -84,6 +86,8 @@ bool Widget::InitDatabase()
 //初始化redis
 bool Widget::InitRedis()
 {
+    return true;
+
     if (m_pRedis != NULL) return true;
 
     LogInfo("正在初始化Redis链接..");
@@ -156,6 +160,42 @@ bool Widget::TargetModify()
     return true;
 }
 
+bool Widget::DelayAllCheck()
+{
+    m_iAllCheckDelaySec -= 1;
+
+    ui->allCheckDelayLable->setText(QString::number(m_iAllCheckDelaySec));
+
+    if (m_iAllCheckDelaySec == 0)
+    {
+        check();
+
+        return true;
+    }
+
+    m_pTimer->start(1000);
+
+    return true;
+}
+
+bool Widget::DelayTargetCheck()
+{
+    m_iTargetCheckDelaySec -= 1;
+
+    ui->targetCheckDelayLable->setText(QString::number(m_iTargetCheckDelaySec));
+
+    if (m_iTargetCheckDelaySec == 0)
+    {
+        targetCheck();
+
+        return true;
+    }
+
+    m_pTargetTimer->start(1000);
+
+    return true;
+}
+
 bool Widget::DelayTargetModify()
 {
     m_iModifyDelaySec -= 1;
@@ -216,12 +256,12 @@ bool Widget::targetCheck()
         LogInfo("域名" + domain + "检测正常");
     }
 
-    connect(m_pTargetTimer, &QTimer::timeout , this, &Widget::targetCheck);
-
     QString sec = ui->secondEdit->text();
 
+    m_iTargetCheckDelaySec = sec.toInt() + 1;
+
     LogInfo("检测完毕,距离下次检测还有" + sec + "秒");
-    m_pTargetTimer->start(sec.toInt() * 1000);
+    m_pTargetTimer->start(1000);
 
     return true;
 }
@@ -252,12 +292,12 @@ bool Widget::check()
         }
     }
 
-    connect(m_pTimer, &QTimer::timeout , this, &Widget::check);
-
     QString sec = ui->checkTimerEdit->text();
 
+    m_iAllCheckDelaySec = sec.toInt() + 1;
+
     LogInfo("检测完毕,距离下次检测还有" + sec + "秒");
-    m_pTimer->start(sec.toInt() * 1000);
+    m_pTimer->start(1000);
 
     return true;
 }

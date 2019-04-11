@@ -40,6 +40,8 @@ public:
     QLabel *label_4;
     QLineEdit *secondEdit2;
     QLabel *modifyDelayLabel;
+    QLabel *allCheckDelayLable;
+    QLabel *targetCheckDelayLable;
 
     void setupUi(QWidget *Widget)
     {
@@ -54,10 +56,10 @@ public:
         startButton->setGeometry(QRect(30, 20, 75, 23));
         checkTimerEdit = new QLineEdit(Widget);
         checkTimerEdit->setObjectName(QStringLiteral("checkTimerEdit"));
-        checkTimerEdit->setGeometry(QRect(340, 20, 31, 20));
+        checkTimerEdit->setGeometry(QRect(270, 20, 31, 20));
         checkTimerLabel = new QLabel(Widget);
         checkTimerLabel->setObjectName(QStringLiteral("checkTimerLabel"));
-        checkTimerLabel->setGeometry(QRect(200, 20, 131, 20));
+        checkTimerLabel->setGeometry(QRect(130, 20, 131, 20));
         targetStartButton = new QPushButton(Widget);
         targetStartButton->setObjectName(QStringLiteral("targetStartButton"));
         targetStartButton->setGeometry(QRect(30, 50, 75, 23));
@@ -91,6 +93,12 @@ public:
         modifyDelayLabel = new QLabel(Widget);
         modifyDelayLabel->setObjectName(QStringLiteral("modifyDelayLabel"));
         modifyDelayLabel->setGeometry(QRect(350, 80, 41, 20));
+        allCheckDelayLable = new QLabel(Widget);
+        allCheckDelayLable->setObjectName(QStringLiteral("allCheckDelayLable"));
+        allCheckDelayLable->setGeometry(QRect(310, 20, 41, 20));
+        targetCheckDelayLable = new QLabel(Widget);
+        targetCheckDelayLable->setObjectName(QStringLiteral("targetCheckDelayLable"));
+        targetCheckDelayLable->setGeometry(QRect(350, 50, 41, 20));
 
         retranslateUi(Widget);
 
@@ -114,6 +122,8 @@ public:
         label_4->setText(QApplication::translate("Widget", "\345\256\232\346\227\266\346\227\266\351\227\264(\347\247\222)", Q_NULLPTR));
         secondEdit2->setText(QApplication::translate("Widget", "120", Q_NULLPTR));
         modifyDelayLabel->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
+        allCheckDelayLable->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
+        targetCheckDelayLable->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
     } // retranslateUi
 
 };
