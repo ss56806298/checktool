@@ -5,16 +5,21 @@
 #include "adoconnection.h"
 #include "adorecordset.h"
 
+
 class QtRedis;
+
+class Widget;
 
 class Database
 {
 public:
-    Database();
-    Database(QtRedis*);
+    Database(Widget *);
+    Database(Widget *, QtRedis*);
     ~Database();
 private:
     AdoConnection * m_pAdoConnection;
+
+    Widget * m_pWidget;
 
     QtRedis * m_pRedis = NULL;
 public:
@@ -27,6 +32,10 @@ public:
     bool ModifyDomain(QString domain);
 
     bool ModifyHallId(QString HallId);
+private:
+    bool GetFreeDomain(QString& freeDomain);
+
+    bool RecoverDomain(QString& domain);
 };
 
 #endif // DATABASE_H

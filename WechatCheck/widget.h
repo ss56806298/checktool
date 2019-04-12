@@ -75,7 +75,7 @@ private:
     //初始化redis
     bool InitRedis();
 
-private:
+public:
     //检测
     bool check();
     //指定域名检测

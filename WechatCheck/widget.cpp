@@ -71,7 +71,7 @@ bool Widget::InitDatabase()
     QString DBPass = m_pSettings->value("/DB/Password").toString();
     QString DBPort = m_pSettings->value("/DB/Port").toString();
 
-    m_pDatabase = new Database(m_pRedis);
+    m_pDatabase = new Database(this, m_pRedis);
 
     if(!m_pDatabase->Init(DBName, DBAddr, UserName, DBPass, DBPort))
     {
@@ -86,7 +86,6 @@ bool Widget::InitDatabase()
 //初始化redis
 bool Widget::InitRedis()
 {
-    return true;
 
     if (m_pRedis != NULL) return true;
 
@@ -290,6 +289,12 @@ bool Widget::check()
         {
             LogInfo("域名" + domain + "检测正常");
         }
+
+        QElapsedTimer t;
+        t.start();
+
+        while(t.elapsed()<2000)
+            QCoreApplication::processEvents();
     }
 
     QString sec = ui->checkTimerEdit->text();
@@ -411,12 +416,14 @@ bool Widget::getHttpResponse(QString url, QByteArray &response)
 
     response = reply->readAll();
 
-    LogInfoF("返回code:" + QString(StatusCode) + " 请求返回:" + QString(response));
+    LogInfoF("返回code:" + QString::number(StatusCode) + " 请求返回:" + QString(response));
 
     if (StatusCode == 302)
     {
-        getHttpResponse(reply->rawHeader("Location"), response);
+        getHttpResponse("http://" + QString(reply->rawHeader("Location")), response);
     }
+
+    delete pNetManager;
 
     return true;
 }

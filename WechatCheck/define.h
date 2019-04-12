@@ -10,6 +10,7 @@
 #include <QEventLoop>
 #include <QJsonParseError>
 #include <QTimer>
+#include <QElapsedTimer>
 
 #include "windows.h"
 
