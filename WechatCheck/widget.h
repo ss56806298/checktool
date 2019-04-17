@@ -35,12 +35,16 @@ protected:
     QTimer *m_pTargetTimer;
     //指定更换倒计时
     QTimer *m_pModifyTimer;
+    //检测b表倒计时
+    QTimer *m_pCheckTableBTimer;
     //全局检测倒计时
     int m_iAllCheckDelaySec;
     //指定检测倒计时
     int m_iTargetCheckDelaySec;
     //指定更换倒计时秒数
     int m_iModifyDelaySec;
+    //指定检测b表倒计时
+    int m_iCheckTableBSec;
 
 //系统服务对象
 protected:
@@ -48,6 +52,9 @@ protected:
     Database * m_pDatabase = NULL;
     //redis
     QtRedis * m_pRedis = NULL;
+    //B表检查时间间隔
+    QString m_szMinuteTableB;
+
 
 //界面调用
     //开始运行
@@ -56,12 +63,16 @@ protected:
     bool TargetStart();
     //指定大厅更换
     bool TargetModify();
+    //检查b表
+    bool CheckTableB();
     //全局检测倒计时
     bool DelayAllCheck();
     //指定检测倒计时
     bool DelayTargetCheck();
     //指定大厅更换倒计时
     bool DelayTargetModify();
+    //检测b表倒计时
+    bool DelayCheckTableB();
 
 //系统函数
 public:
@@ -82,6 +93,8 @@ public:
     bool targetCheck();
     //指定大厅更换
     bool targetModify();
+    //b表检查
+    bool checkTableB();
 
     //检测域名
     bool checkDomain(QString domain);
@@ -89,6 +102,8 @@ public:
     bool getWechatAccessToken(QString& token);
     //更换域名
     bool modifyDomain(QString domain);
+    //更换域名 指定GameHallId ver
+    bool modifyDomain(QString domain, QString GameHallId);
     //获取http返回
     bool getHttpResponse(QString url, QByteArray& response);
     //获取http返回

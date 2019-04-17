@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>397</width>
-    <height>414</height>
+    <width>416</width>
+    <height>468</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,9 +17,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>110</y>
-     <width>381</width>
-     <height>301</height>
+     <y>140</y>
+     <width>391</width>
+     <height>321</height>
     </rect>
    </property>
   </widget>
@@ -208,7 +208,7 @@
   <widget class="QLabel" name="allCheckDelayLable">
    <property name="geometry">
     <rect>
-     <x>310</x>
+     <x>350</x>
      <y>20</y>
      <width>41</width>
      <height>20</height>
@@ -225,6 +225,58 @@
      <y>50</y>
      <width>41</width>
      <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>1</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="tableBCheckButton">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>110</y>
+     <width>75</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>B表检查</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>110</x>
+     <y>110</y>
+     <width>101</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>定时检查时间(秒)</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="tableBCheckEdit">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>110</y>
+     <width>51</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>600</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="tableBCheckDelayLabel">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>110</y>
+     <width>21</width>
+     <height>16</height>
     </rect>
    </property>
    <property name="text">

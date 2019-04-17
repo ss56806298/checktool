@@ -11,6 +11,8 @@ Database::Database(Widget * widget)
     m_pWidget = widget;
 
     m_pAdoConnection = new AdoConnection;
+
+    m_pAdoConnection2 = new AdoConnection;
 }
 
 Database::Database(Widget * widget, QtRedis* pRedis)
@@ -18,6 +20,8 @@ Database::Database(Widget * widget, QtRedis* pRedis)
     m_pWidget = widget;
 
     m_pAdoConnection = new AdoConnection;
+
+    m_pAdoConnection2 = new AdoConnection;
 
     m_pRedis = pRedis;
 }
@@ -39,6 +43,10 @@ bool Database::Init(QString& DBName, QString& DBAddr, QString& UserName, QString
     m_pAdoConnection->open(openString);
 
     if (!m_pAdoConnection->isOpen()) return false;
+
+    m_pAdoConnection2->open(openString);
+
+    if (!m_pAdoConnection2->isOpen()) return false;
 
     return true;
 }
@@ -72,17 +80,31 @@ QSet<QString> Database::GetWaitCheckDomains()
 
     while(recordset.next())
     {
-        int count = recordset.fieldCount();
+        QString value = recordset.fieldValue(0).toString();
 
-        for(int i = 0; i < count; i++)
-        {
-            QString value = recordset.fieldValue(i).toString();
-
-            if (!domains.contains(value)) domains.insert(value);
-        }
+        if (!domains.contains(value)) domains.insert(value);
     }
 
     return domains;
+}
+
+bool Database::GetWaitCheckDomains(QMap<QString, QString> & waitCheckDomainsMap)
+{
+    QString sql = "SELECT GameHallId, AppBindDomain FROM GameHallConfig WHERE GameHallId > 3 ORDER BY GameHallId ASC";
+    AdoRecordset recordset(m_pAdoConnection);
+
+    recordset.open(sql);
+
+    while(recordset.next())
+    {
+        QString key = recordset.fieldValue(0).toString();
+
+        QString value = recordset.fieldValue(1).toString();
+
+        waitCheckDomainsMap[key] = value;
+    }
+
+    return true;
 }
 
 bool Database::ModifyDomain(QString domain)
@@ -90,6 +112,60 @@ bool Database::ModifyDomain(QString domain)
     QString newDomain;
 
     if (!GetFreeDomain(newDomain))
+    {
+        return false;
+    }
+
+    AdoRecordset recordset(m_pAdoConnection);
+
+    QString sql = QString("SELECT a.GameHallId, a.AppBindDomain, b.Code FROM GameHallConfig a, GameHallInfo b WHERE a.GameHallId = b.GameHallId AND a.AppBindDomain = '%1'")
+            .arg(domain);
+
+   recordset.open(sql);
+   QStringList sqlList;
+
+   while (recordset.next())
+   {
+//        if (m_pRedis != NULL)
+//        {
+//            m_pRedis->del(REDIS_GAMEHALL + recordset.fieldValue(0).toString());
+//        }
+        sqlList.append(QString("INSERT INTO GameHallReuseDomain(Domain, GameHallId, Code) VALUES ('%1', %2, '%3')")
+                       .arg(recordset.fieldValue(1).toString())
+                       .arg(recordset.fieldValue(0).toString())
+                       .arg(recordset.fieldValue(2).toString()));
+   }
+
+   recordset.close();
+
+   foreach(const QString& sql2, sqlList)
+   {
+       recordset.open(sql2);
+   }
+
+    sql = QString("UPDATE GameHallConfig SET AppRootDomain='%1', AppBindDomain='%2', AppCookieDomain='%3' WHERE AppBindDomain='%4'")
+            .arg(newDomain)
+            .arg("wx." + newDomain)
+            .arg("." + newDomain)
+            .arg(domain);
+
+    recordset.open(sql);
+
+    sql = QString("UPDATE GameHallDomainPool SET State=1, UpdateTime=GETDATE() WHERE Domain='%1'")
+            .arg(newDomain);
+
+    recordset.open(sql);
+
+    RecoverDomain(domain);
+
+    return true;
+}
+
+bool Database::ModifyDomain(QString domain, QString gameHallId)
+{
+    QString newDomain;
+
+    if (!GetFreeDomain(newDomain, gameHallId))
     {
         return false;
     }
@@ -143,14 +219,14 @@ bool Database::ModifyHallId(QString HallId)
 {
     QString newDomain;
 
-    if (!GetFreeDomain(newDomain))
+    if (!GetFreeDomain(newDomain, HallId))
     {
         return false;
     }
 
     AdoRecordset recordset(m_pAdoConnection);
 
-    QString sql = QString("SELECT a.GameHallId, a.AppBindDomain, b.Code FROM GameHallConfig a, GameHallInfo b WHERE a.GameHallId = b.GameHallId AND a.GameHallId = '%1'")
+    QString sql = QString("SELECT a.GameHallId, a.AppBindDomain, b.Code FROM GameHallConfig a, GameHallInfo b WHERE a.GameHallId = b.GameHallId AND a.GameHallId = %1")
             .arg(HallId);
 
    recordset.open(sql);
@@ -163,7 +239,7 @@ bool Database::ModifyHallId(QString HallId)
         {
             m_pRedis->del(REDIS_GAMEHALL + recordset.fieldValue(0).toString());
         }
-       oldDomain = recordset.fieldValue(1).toString();
+        oldDomain = recordset.fieldValue(1).toString();
         sqlList.append(QString("INSERT INTO GameHallReuseDomain(Domain, GameHallId, Code) VALUES ('%1', %2, '%3')")
                        .arg(recordset.fieldValue(1).toString())
                        .arg(recordset.fieldValue(0).toString())
@@ -177,7 +253,7 @@ bool Database::ModifyHallId(QString HallId)
        recordset.open(sql2);
    }
 
-    sql = QString("UPDATE GameHallConfig SET AppRootDomain='%1', AppBindDomain='%2', AppCookieDomain='%3' WHERE GameHallId='%4'")
+    sql = QString("UPDATE GameHallConfig SET AppRootDomain='%1', AppBindDomain='%2', AppCookieDomain='%3' WHERE GameHallId=%4")
             .arg(newDomain)
             .arg("wx." + newDomain)
             .arg("." + newDomain)
@@ -195,6 +271,24 @@ bool Database::ModifyHallId(QString HallId)
     return true;
 }
 
+bool Database::CheckTableB(QString Minute)
+{
+    AdoRecordset recordset(m_pAdoConnection);
+
+    QString sql = QString("SELECT ID FROM GameHallReuseDomain WHERE CreateTime < DATEADD(MINUTE, -%1, GETDATE())").arg(Minute);
+
+    recordset.open(sql);
+
+    while (recordset.next())
+    {
+        DeleteTableBOverdateDomain(recordset.fieldValue(0).toString());
+    }
+
+    recordset.close();
+
+    return true;
+}
+
 bool Database::GetFreeDomain(QString& freeDomain)
 {
     AdoRecordset recordset(m_pAdoConnection);
@@ -203,20 +297,75 @@ bool Database::GetFreeDomain(QString& freeDomain)
 
     recordset.open(sql);
 
-    if (!recordset.next())
+    //获得空闲域名flag
+    bool GetFlag = false;
+
+    while (recordset.next())
     {
-        LogNotice("域名池为空,没有闲置的域名了");
+        freeDomain = recordset.fieldValue(0).toString();
+
+        LogInfo("获取空闲域名:" + freeDomain);
+
+        if (!m_pWidget->checkDomain("wx." + freeDomain))
+        {
+            LogInfo("域名" + freeDomain + "检测被封");
+        }
+        else
+        {
+            LogInfo("域名" + freeDomain + "检测正常");
+            GetFlag = true;
+            break;
+        }
+    }
+
+    if (!GetFlag)
+    {
+        LogNotice("没有空闲域名了");
 
         return false;
     }
 
-    freeDomain = recordset.fieldValue(0).toString();
+    recordset.close();
 
-    LogInfo("获得空闲域名:" + freeDomain);
+    return true;
+}
 
-    if (!m_pWidget->checkDomain(freeDomain))
+//获取空闲域名 GameHallId ver.
+bool Database::GetFreeDomain(QString& freeDomain, QString GameHallId)
+{
+    AdoRecordset recordset(m_pAdoConnection);
+
+    QString sql = QString("SELECT Domain FROM GameHallDomainPool WHERE State = 0 AND GameHallId = %1 ORDER BY UpdateTime ASC")
+            .arg(GameHallId);
+
+    recordset.open(sql);
+
+    //获得空闲域名flag
+    bool GetFlag = false;
+
+    while (recordset.next())
     {
-        GetFreeDomain(freeDomain);
+        freeDomain = recordset.fieldValue(0).toString();
+
+        LogInfo("获取空闲域名:" + freeDomain);
+
+        if (!m_pWidget->checkDomain("wx." + freeDomain))
+        {
+            LogInfo("域名" + freeDomain + "检测被封");
+        }
+        else
+        {
+            LogInfo("域名" + freeDomain + "检测正常");
+            GetFlag = true;
+            break;
+        }
+    }
+
+    if (!GetFlag)
+    {
+        LogNotice("大厅id:" + GameHallId +"没有空闲域名了");
+
+        return false;
     }
 
     recordset.close();
@@ -227,9 +376,9 @@ bool Database::GetFreeDomain(QString& freeDomain)
 //回收域名
 bool Database::RecoverDomain(QString& domain)
 {
-    AdoRecordset recordset(m_pAdoConnection);
+    AdoRecordset recordset(m_pAdoConnection2);
 
-    domain.right(3);
+    domain = domain.right(domain.length() - 3);
 
     LogInfo("回收域名" + domain);
 
@@ -243,7 +392,19 @@ bool Database::RecoverDomain(QString& domain)
 
     recordset.open(sql);
 
-    recordset.close();
+    return true;
+}
+
+//删除b表数据
+bool Database::DeleteTableBOverdateDomain(QString ID)
+{
+    AdoRecordset recordset(m_pAdoConnection2);
+
+    QString sql = QString("DELETE GameHallReuseDomain WHERE ID = %1").arg(ID);
+
+    recordset.open(sql);
+
+    LogInfo(QString("B表第%1条数据已过期,删除成功").arg(ID));
 
     return true;
 }

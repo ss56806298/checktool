@@ -42,15 +42,19 @@ public:
     QLabel *modifyDelayLabel;
     QLabel *allCheckDelayLable;
     QLabel *targetCheckDelayLable;
+    QPushButton *tableBCheckButton;
+    QLabel *label_5;
+    QLineEdit *tableBCheckEdit;
+    QLabel *tableBCheckDelayLabel;
 
     void setupUi(QWidget *Widget)
     {
         if (Widget->objectName().isEmpty())
             Widget->setObjectName(QStringLiteral("Widget"));
-        Widget->resize(397, 414);
+        Widget->resize(416, 468);
         logBrowser = new QTextBrowser(Widget);
         logBrowser->setObjectName(QStringLiteral("logBrowser"));
-        logBrowser->setGeometry(QRect(10, 110, 381, 301));
+        logBrowser->setGeometry(QRect(10, 140, 391, 321));
         startButton = new QPushButton(Widget);
         startButton->setObjectName(QStringLiteral("startButton"));
         startButton->setGeometry(QRect(30, 20, 75, 23));
@@ -95,10 +99,22 @@ public:
         modifyDelayLabel->setGeometry(QRect(350, 80, 41, 20));
         allCheckDelayLable = new QLabel(Widget);
         allCheckDelayLable->setObjectName(QStringLiteral("allCheckDelayLable"));
-        allCheckDelayLable->setGeometry(QRect(310, 20, 41, 20));
+        allCheckDelayLable->setGeometry(QRect(350, 20, 41, 20));
         targetCheckDelayLable = new QLabel(Widget);
         targetCheckDelayLable->setObjectName(QStringLiteral("targetCheckDelayLable"));
         targetCheckDelayLable->setGeometry(QRect(350, 50, 41, 20));
+        tableBCheckButton = new QPushButton(Widget);
+        tableBCheckButton->setObjectName(QStringLiteral("tableBCheckButton"));
+        tableBCheckButton->setGeometry(QRect(30, 110, 75, 23));
+        label_5 = new QLabel(Widget);
+        label_5->setObjectName(QStringLiteral("label_5"));
+        label_5->setGeometry(QRect(110, 110, 101, 16));
+        tableBCheckEdit = new QLineEdit(Widget);
+        tableBCheckEdit->setObjectName(QStringLiteral("tableBCheckEdit"));
+        tableBCheckEdit->setGeometry(QRect(220, 110, 51, 20));
+        tableBCheckDelayLabel = new QLabel(Widget);
+        tableBCheckDelayLabel->setObjectName(QStringLiteral("tableBCheckDelayLabel"));
+        tableBCheckDelayLabel->setGeometry(QRect(350, 110, 21, 16));
 
         retranslateUi(Widget);
 
@@ -124,6 +140,10 @@ public:
         modifyDelayLabel->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
         allCheckDelayLable->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
         targetCheckDelayLable->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
+        tableBCheckButton->setText(QApplication::translate("Widget", "B\350\241\250\346\243\200\346\237\245", Q_NULLPTR));
+        label_5->setText(QApplication::translate("Widget", "\345\256\232\346\227\266\346\243\200\346\237\245\346\227\266\351\227\264(\347\247\222)", Q_NULLPTR));
+        tableBCheckEdit->setText(QApplication::translate("Widget", "600", Q_NULLPTR));
+        tableBCheckDelayLabel->setText(QApplication::translate("Widget", "1", Q_NULLPTR));
     } // retranslateUi
 
 };

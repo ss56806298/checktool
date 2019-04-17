@@ -16,19 +16,24 @@ Widget::Widget(QWidget *parent) :
 
     m_pModifyTimer = new QTimer();
 
+    m_pCheckTableBTimer = new QTimer();
+
     m_pNumValidator = new QRegExpValidator(QRegExp("[0-9]+$"));
     ui->checkTimerEdit->setValidator(m_pNumValidator);
     ui->secondEdit->setValidator(m_pNumValidator);
     ui->gameHallIdEdit->setValidator(m_pNumValidator);
     ui->secondEdit2->setValidator(m_pNumValidator);
     ui->modifyHallEdit->setValidator(m_pNumValidator);
+    ui->tableBCheckEdit->setValidator(m_pNumValidator);
 
     connect(ui->startButton, &QPushButton::clicked, this, &Widget::Start);
     connect(ui->targetStartButton, &QPushButton::clicked, this, &Widget::TargetStart);
     connect(ui->modifyStartButton, &QPushButton::clicked, this, &Widget::TargetModify);
+    connect(ui->tableBCheckButton, &QPushButton::clicked, this, &Widget::CheckTableB);
     connect(m_pModifyTimer, &QTimer::timeout , this, &Widget::DelayTargetModify);
     connect(m_pTimer, &QTimer::timeout, this, &Widget::DelayAllCheck);
     connect(m_pTargetTimer, &QTimer::timeout, this, &Widget::DelayTargetCheck);
+    connect(m_pCheckTableBTimer, &QTimer::timeout, this, &Widget::DelayCheckTableB);
 }
 
 Widget::~Widget()
@@ -39,11 +44,15 @@ Widget::~Widget()
 
     delete m_pDatabase;
 
+    delete m_pNumValidator;
+
     delete m_pTimer;
 
     delete m_pTargetTimer;
 
     delete m_pModifyTimer;
+
+    delete m_pCheckTableBTimer;
 }
 
 bool Widget::Init()
@@ -154,7 +163,31 @@ bool Widget::TargetModify()
 
     ui->modifyStartButton->setDisabled(true);
 
+#ifdef _DEBUG
+    QString sec = ui->secondEdit2->text();
+
+    m_iModifyDelaySec = sec.toInt() + 1;
+
+    m_pModifyTimer->start(1000);
+#else
     targetModify();
+#endif
+
+    return true;
+}
+
+//b表检查
+bool Widget::CheckTableB()
+{
+    if (!InitRedis()) return false;
+
+    if (!InitDatabase()) return false;
+
+    m_szMinuteTableB = m_pSettings->value("/Param/TableBCheckMinute").toString();
+
+    ui->tableBCheckButton->setDisabled(true);
+
+    checkTableB();
 
     return true;
 }
@@ -213,6 +246,43 @@ bool Widget::DelayTargetModify()
     return true;
 }
 
+bool Widget::DelayCheckTableB()
+{
+    m_iCheckTableBSec -= 1;
+
+    ui->tableBCheckDelayLabel->setText(QString::number(m_iCheckTableBSec));
+
+    if (m_iCheckTableBSec == 0)
+    {
+        checkTableB();
+
+        return true;
+    }
+
+    m_pCheckTableBTimer->start(1000);
+
+    return true;
+}
+
+//b表检查
+bool Widget::checkTableB()
+{
+    if (!m_pDatabase->CheckTableB(m_szMinuteTableB))
+    {
+        return false;
+    }
+
+    QString sec = ui->tableBCheckEdit->text();
+
+    m_iCheckTableBSec = sec.toInt() + 1;
+
+    LogInfo("B表过期数据检查完毕距离下次更换还有" + sec + "秒");
+
+    m_pCheckTableBTimer->start(1000);
+
+    return true;
+}
+
 //指定大厅id更换
 bool Widget::targetModify()
 {
@@ -239,7 +309,9 @@ bool Widget::targetCheck()
 {
     QString domain;
 
-    if (!m_pDatabase->GetDomainByGameHallId(ui->gameHallIdEdit->text(), domain))
+    QString gameHallId = ui->gameHallIdEdit->text();
+
+    if (!m_pDatabase->GetDomainByGameHallId(gameHallId, domain))
     {
         return false;
     }
@@ -248,7 +320,7 @@ bool Widget::targetCheck()
     if (!checkDomain(domain))
     {
         LogInfo("域名" + domain + "检测已被封禁");
-        modifyDomain(domain);
+        modifyDomain(domain, gameHallId);
     }
     else
     {
@@ -268,22 +340,30 @@ bool Widget::targetCheck()
 //检测
 bool Widget::check()
 {
-    QSet<QString> domains = m_pDatabase->GetWaitCheckDomains();
+    QMap<QString, QString> waitCheckDomainsMap;
 
-    if (domains.size() == 0)
+    if (m_pDatabase->GetWaitCheckDomains(waitCheckDomainsMap)) return false;
+
+    if (waitCheckDomainsMap.size() == 0)
     {
         LogInfo("无可检查的域名..");
 
         return true;
     }
 
-    foreach(const QString & domain, domains)
+    QMapIterator<QString, QString> iter(waitCheckDomainsMap);
+
+    while (iter.hasNext())
     {
+        QString gameHallId = iter.key();
+
+        QString domain = iter.value();
+
         LogInfo("检查域名:" + domain);
         if (!checkDomain(domain))
         {
             LogInfo("域名" + domain + "检测已被封禁");
-            modifyDomain(domain);
+            modifyDomain(domain, gameHallId);
         }
         else
         {
@@ -311,6 +391,14 @@ bool Widget::check()
 bool Widget::modifyDomain(QString domain)
 {
     m_pDatabase->ModifyDomain(domain);
+
+    return true;
+}
+
+//更换域名 GameHallId ver
+bool Widget::modifyDomain(QString domain, QString GameHallId)
+{
+    m_pDatabase->ModifyDomain(domain, GameHallId);
 
     return true;
 }
@@ -510,7 +598,7 @@ bool Widget::getShortUrl(QString token, QString domain, QString &shortUrl)
 
     if (!getJsonContent(response, "short_url", shortUrl))
     {
-        return false;
+        return false;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
     }
 
     return true;
